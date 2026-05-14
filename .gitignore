@@ -17,13 +17,12 @@ coverage/
 .vscode/
 .idea/
 
-# Debug logs
+# Logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 
-# Local env files
+# Environment — never commit real secrets
 .env
 .env.local
 .env.*.local
@@ -37,5 +36,8 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Drizzle
+# Drizzle generated output
 drizzle/
+
+# pnpm auto-generated
+pnpm-workspace.yaml
