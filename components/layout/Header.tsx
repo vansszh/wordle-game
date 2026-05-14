@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { BarChart3, HelpCircle, Settings as SettingsIcon } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 
@@ -9,15 +10,7 @@ interface HeaderProps {
   onOpenSettings: () => void;
 }
 
-function IconButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"

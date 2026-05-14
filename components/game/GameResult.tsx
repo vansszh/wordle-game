@@ -7,7 +7,6 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useToastStore } from "@/store/toastStore";
 import { buildShareGrid, shareOrCopy } from "@/lib/utils";
 import { dayOffsetForDate, formatCountdown, msUntilNextUtcMidnight } from "@/lib/game/words";
-import { PUZZLE_EPOCH_UTC } from "@/lib/game/words";
 
 export function GameResult() {
   const game = useGameStore((s) => s.current);
@@ -15,23 +14,20 @@ export function GameResult() {
   const highContrast = useSettingsStore((s) => s.highContrast);
   const pushToast = useToastStore((s) => s.push);
 
-  const [countdown, setCountdown] = useState<string>(() => formatCountdown(msUntilNextUtcMidnight()));
-
+  const [countdown, setCountdown] = useState(() => formatCountdown(msUntilNextUtcMidnight()));
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setCountdown(formatCountdown(msUntilNextUtcMidnight()));
-    }, 1000);
+    const id = window.setInterval(() => setCountdown(formatCountdown(msUntilNextUtcMidnight())), 1000);
     return () => window.clearInterval(id);
   }, []);
 
   if (game.gameStatus === "IN_PROGRESS") return null;
 
   const won = game.gameStatus === "WIN";
-  const guesses = game.boardState.filter(Boolean);
+  const guessCount = game.boardState.filter(Boolean).length;
 
   const handleShare = async () => {
     const text = buildShareGrid({
-      puzzleNumber: dayOffsetForDate(new Date(game.date + "T00:00:00Z")) + 1,
+      puzzleNumber: dayOffsetForDate(new Date(`${game.date}T00:00:00Z`)) + 1,
       guesses: game.boardState,
       evaluations: game.evaluations,
       won,
@@ -39,13 +35,13 @@ export function GameResult() {
       highContrast,
     });
     const result = await shareOrCopy(text);
-    if (result === "copied") pushToast("Copied results to clipboard", 1400);
-    else if (result === "shared") pushToast("Shared!", 1200);
-    else pushToast("Share failed", 1500);
+    pushToast(
+      result === "copied" ? "Copied results to clipboard"
+      : result === "shared" ? "Shared!"
+      : "Share failed",
+      1400,
+    );
   };
-
-  // Avoid unused-var warning for PUZZLE_EPOCH_UTC re-export.
-  void PUZZLE_EPOCH_UTC;
 
   return (
     <div
@@ -54,7 +50,7 @@ export function GameResult() {
       aria-live="polite"
     >
       <p className="text-sm font-medium text-[var(--c-text-secondary)]">
-        {won ? `Solved in ${guesses.length} ${guesses.length === 1 ? "guess" : "guesses"}` : "Better luck tomorrow"}
+        {won ? `Solved in ${guessCount} ${guessCount === 1 ? "guess" : "guesses"}` : "Better luck tomorrow"}
       </p>
       <div className="flex w-full items-center justify-between text-xs text-[var(--c-text-secondary)]">
         <div className="flex flex-col">
@@ -71,7 +67,7 @@ export function GameResult() {
       </div>
       <p className="sr-only">
         {won
-          ? `You won in ${guesses.length} guesses. Current streak: ${stats.currentStreak}.`
+          ? `You won in ${guessCount} guesses. Current streak: ${stats.currentStreak}.`
           : `You did not solve today's puzzle. Current streak: ${stats.currentStreak}.`}
       </p>
     </div>

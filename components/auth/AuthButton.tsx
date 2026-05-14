@@ -1,7 +1,7 @@
 "use client";
 
-import { LogIn, LogOut, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { CheckCircle2, LogIn, LogOut } from "lucide-react";
 import { useSync } from "@/hooks/useSync";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export function AuthButton({ fullWidth = false }: AuthButtonProps) {
         onClick={() => void signInWithGoogle()}
         className={cn(
           "inline-flex items-center justify-center gap-3 rounded-md border border-[var(--c-border-subtle)] bg-[var(--c-bg-elevated)] px-4 py-2.5 text-sm font-medium text-[var(--c-text-primary)] transition-colors hover:bg-[var(--c-bg-surface)]",
-          fullWidth ? "w-full" : "",
+          fullWidth && "w-full",
         )}
       >
         <LogIn size={16} aria-hidden="true" />
@@ -37,8 +37,10 @@ export function AuthButton({ fullWidth = false }: AuthButtonProps) {
     );
   }
 
+  const initial = (user.displayName ?? user.email)[0]?.toUpperCase() ?? "?";
+
   return (
-    <div className={cn("flex items-center gap-3", fullWidth ? "w-full" : "")}>
+    <div className={cn("flex items-center gap-3", fullWidth && "w-full")}>
       <div className="flex flex-1 items-center gap-3 overflow-hidden">
         {user.avatarUrl ? (
           <Image
@@ -53,7 +55,7 @@ export function AuthButton({ fullWidth = false }: AuthButtonProps) {
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--c-accent)] text-sm font-bold text-white"
             aria-hidden="true"
           >
-            {(user.displayName ?? user.email)[0]?.toUpperCase()}
+            {initial}
           </div>
         )}
         <div className="flex min-w-0 flex-col">

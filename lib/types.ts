@@ -1,4 +1,3 @@
-/** Inputs accepted by the cn() class-name helper. */
 export type ClassValue =
   | string
   | number

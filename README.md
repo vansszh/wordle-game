@@ -2,7 +2,7 @@
 
 A pixel-perfect, production-ready clone of the original New York Times Wordle, built as a single-page Next.js 15 app with optional cloud sync.
 
-> _Screenshot placeholder — drop a `docs/screenshot.png` in here once the app is running locally and reference it in this section._
+![Wordle screenshot](docs/screenshot.png)
 
 ## Features
 

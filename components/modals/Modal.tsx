@@ -8,63 +8,47 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  /** Optional description rendered between the title and content. */
   description?: ReactNode;
   children: ReactNode;
-  /** Render the close button? Default true. */
   closable?: boolean;
 }
 
-/**
- * Accessible modal with focus trap, ESC-to-close, and scale+opacity animations.
- * Uses Framer Motion for the enter/exit transition and Tailwind for layout.
- */
+const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
 export function Modal({ open, onClose, title, description, children, closable = true }: ModalProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const lastFocusRef = useRef<HTMLElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    lastFocusRef.current = document.activeElement as HTMLElement | null;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
 
-    // Focus the first focusable child on open.
-    const t = window.setTimeout(() => {
-      const focusable = cardRef.current?.querySelector<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      focusable?.focus();
+    const focusTimer = window.setTimeout(() => {
+      cardRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
     }, 50);
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
-      } else if (e.key === "Tab" && cardRef.current) {
-        const focusables = Array.from(
-          cardRef.current.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
-          ),
-        );
-        if (focusables.length === 0) return;
-        const first = focusables[0]!;
-        const last = focusables[focusables.length - 1]!;
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
+        return;
       }
+      if (e.key !== "Tab" || !cardRef.current) return;
+      const items = Array.from(cardRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (items.length === 0) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
 
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
-      window.clearTimeout(t);
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
-      lastFocusRef.current?.focus();
+      previousFocusRef.current?.focus();
     };
   }, [open, onClose]);
 

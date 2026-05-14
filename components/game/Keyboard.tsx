@@ -19,11 +19,7 @@ interface KeyboardProps {
 export function Keyboard({ onLetter, onEnter, onBackspace }: KeyboardProps) {
   const guesses = useGameStore((s) => s.current.boardState);
   const evaluations = useGameStore((s) => s.current.evaluations);
-
-  const keyMap = useMemo(
-    () => deriveKeyboardState(guesses, evaluations),
-    [guesses, evaluations],
-  );
+  const keyMap = useMemo(() => deriveKeyboardState(guesses, evaluations), [guesses, evaluations]);
 
   return (
     <div className="keyboard" role="group" aria-label="On-screen keyboard">
