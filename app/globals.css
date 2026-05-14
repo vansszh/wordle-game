@@ -1,0 +1,596 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------- */
+/* Tailwind v4 theme tokens — exposed as CSS custom properties + Tailwind     */
+/* utility colors via the @theme directive.                                   */
+/* -------------------------------------------------------------------------- */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  --color-bg-primary: var(--c-bg-primary);
+  --color-bg-secondary: var(--c-bg-secondary);
+  --color-bg-surface: var(--c-bg-surface);
+  --color-bg-elevated: var(--c-bg-elevated);
+
+  --color-tile-empty: var(--c-tile-empty);
+  --color-tile-tbd-border: var(--c-tile-tbd-border);
+  --color-tile-correct: var(--c-tile-correct);
+  --color-tile-present: var(--c-tile-present);
+  --color-tile-absent: var(--c-tile-absent);
+
+  --color-key-bg: var(--c-key-bg);
+  --color-key-correct: var(--c-key-correct);
+  --color-key-present: var(--c-key-present);
+  --color-key-absent: var(--c-key-absent);
+
+  --color-text-primary: var(--c-text-primary);
+  --color-text-secondary: var(--c-text-secondary);
+  --color-text-muted: var(--c-text-muted);
+
+  --color-border-subtle: var(--c-border-subtle);
+  --color-accent: var(--c-accent);
+  --color-focus-ring: var(--c-focus-ring);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Theme palettes                                                              */
+/* -------------------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+  --c-bg-primary: #121213;
+  --c-bg-secondary: #1a1a1b;
+  --c-bg-surface: #262626;
+  --c-bg-elevated: #2f2f2f;
+
+  --c-tile-empty: transparent;
+  --c-tile-tbd-border: #565758;
+  --c-tile-correct: #538d4e;
+  --c-tile-present: #b59f3b;
+  --c-tile-absent: #3a3a3c;
+
+  --c-key-bg: #818384;
+  --c-key-correct: #538d4e;
+  --c-key-present: #b59f3b;
+  --c-key-absent: #3a3a3c;
+
+  --c-text-primary: #ffffff;
+  --c-text-secondary: #818384;
+  --c-text-muted: #565758;
+
+  --c-border-subtle: #3a3a3c;
+  --c-accent: #538d4e;
+  --c-focus-ring: #4a90e2;
+
+  --c-key-text: #ffffff;
+  --c-key-text-revealed: #ffffff;
+  --c-tile-revealed-text: #ffffff;
+  --c-tile-empty-text: #ffffff;
+  --c-modal-backdrop: rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --c-bg-primary: #ffffff;
+  --c-bg-secondary: #f6f7f8;
+  --c-bg-surface: #edeff1;
+  --c-bg-elevated: #ffffff;
+
+  --c-tile-empty: transparent;
+  --c-tile-tbd-border: #878a8c;
+  --c-tile-correct: #6aaa64;
+  --c-tile-present: #c9b458;
+  --c-tile-absent: #787c7e;
+
+  --c-key-bg: #d3d6da;
+  --c-key-correct: #6aaa64;
+  --c-key-present: #c9b458;
+  --c-key-absent: #787c7e;
+
+  --c-text-primary: #1a1a1b;
+  --c-text-secondary: #787c7e;
+  --c-text-muted: #878a8c;
+
+  --c-border-subtle: #d3d6da;
+  --c-accent: #6aaa64;
+  --c-focus-ring: #4a90e2;
+
+  --c-key-text: #1a1a1b;
+  --c-key-text-revealed: #ffffff;
+  --c-tile-revealed-text: #ffffff;
+  --c-tile-empty-text: #1a1a1b;
+  --c-modal-backdrop: rgba(0, 0, 0, 0.5);
+  color-scheme: light;
+}
+
+/* High-contrast (colorblind-friendly) overrides apply on top of either theme. */
+[data-high-contrast="true"] {
+  --c-tile-correct: #f5793a;
+  --c-tile-present: #85c0f9;
+  --c-key-correct: #f5793a;
+  --c-key-present: #85c0f9;
+  --c-accent: #f5793a;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Base                                                                        */
+/* -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--c-bg-primary);
+  color: var(--c-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  min-height: 100svh;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--c-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layout helpers                                                              */
+/* -------------------------------------------------------------------------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  margin-inline: auto;
+  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tile animations                                                             */
+/* -------------------------------------------------------------------------- */
+@keyframes tile-pop {
+  0% {
+    transform: scale(0.85);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tile-flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(-90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes row-shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+@keyframes tile-bounce {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+  60% {
+    transform: translateY(-15px);
+  }
+  80% {
+    transform: translateY(2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Game tile                                                                  */
+/* -------------------------------------------------------------------------- */
+.tile {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 8vw, 2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  -webkit-user-select: none;
+  background-clip: padding-box;
+  transform-style: preserve-3d;
+  transition:
+    border-color 80ms ease,
+    background-color 0ms;
+}
+
+.tile[data-state="empty"] {
+  background-color: var(--c-tile-empty);
+  border: 2px solid var(--c-border-subtle);
+  color: var(--c-tile-empty-text);
+}
+
+.tile[data-state="tbd"] {
+  background-color: var(--c-tile-empty);
+  border: 2px solid var(--c-tile-tbd-border);
+  color: var(--c-tile-empty-text);
+  animation: tile-pop 100ms ease-in-out;
+}
+
+.tile[data-state="absent"],
+.tile[data-state="present"],
+.tile[data-state="correct"] {
+  border: 2px solid transparent;
+  color: var(--c-tile-revealed-text);
+}
+
+.tile[data-state="absent"] {
+  background-color: var(--c-tile-absent);
+}
+
+.tile[data-state="present"] {
+  background-color: var(--c-tile-present);
+}
+
+.tile[data-state="correct"] {
+  background-color: var(--c-tile-correct);
+}
+
+.tile[data-flipping="true"] {
+  animation: tile-flip 600ms ease forwards;
+}
+
+.tile[data-bounce="true"] {
+  animation: tile-bounce 1000ms ease;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Game board                                                                 */
+/* -------------------------------------------------------------------------- */
+.board {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  grid-gap: 5px;
+  padding: 10px;
+  box-sizing: border-box;
+  perspective: 600px;
+  width: 100%;
+  max-width: clamp(300px, 78vw, 380px);
+  aspect-ratio: 5 / 6;
+  margin-inline: auto;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 5px;
+}
+
+.board-row[data-shake="true"] {
+  animation: row-shake 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Keyboard                                                                   */
+/* -------------------------------------------------------------------------- */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 8px 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 58px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background-color: var(--c-key-bg);
+  color: var(--c-key-text);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    transform 80ms ease;
+  min-width: 0;
+}
+
+.key[data-wide="true"] {
+  flex: 1.5;
+  font-size: 12px;
+}
+
+.key[data-state="absent"] {
+  background-color: var(--c-key-absent);
+  color: var(--c-key-text-revealed);
+}
+
+.key[data-state="present"] {
+  background-color: var(--c-key-present);
+  color: var(--c-key-text-revealed);
+}
+
+.key[data-state="correct"] {
+  background-color: var(--c-key-correct);
+  color: var(--c-key-text-revealed);
+}
+
+.key:active {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) {
+  .key:hover {
+    filter: brightness(1.08);
+  }
+}
+
+@media (max-width: 480px) {
+  .key {
+    height: 50px;
+    font-size: 12px;
+  }
+  .key[data-wide="true"] {
+    font-size: 10px;
+  }
+  .keyboard {
+    gap: 6px;
+    padding: 0 4px 6px;
+  }
+  .keyboard-row {
+    gap: 4px;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Toast & misc                                                                */
+/* -------------------------------------------------------------------------- */
+.toast {
+  background-color: var(--c-text-primary);
+  color: var(--c-bg-primary);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 20px;
+  border-radius: 9999px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  animation: toast-slide-in 150ms ease-out;
+}
+
+.modal-backdrop {
+  background-color: var(--c-modal-backdrop);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  background-color: var(--c-bg-elevated);
+  color: var(--c-text-primary);
+  border-radius: 12px;
+  border: 1px solid var(--c-border-subtle);
+  animation: modal-pop-in 200ms ease-out;
+}
+
+/* Hide native scrollbars on modal scrollers but keep functionality. */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--c-text-muted);
+  border-radius: 3px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reduced motion                                                              */
+/* -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .tile[data-flipping="true"],
+  .tile[data-bounce="true"],
+  .tile[data-state="tbd"],
+  .board-row[data-shake="true"],
+  .toast,
+  .modal-card {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Laptop / desktop polish                                                    */
+/* -------------------------------------------------------------------------- */
+
+/* Subtle radial vignette outside the play area — gives blank desktop space
+   some depth without being noisy. It only paints when the viewport is wide
+   enough to actually have empty room around the centered shell. */
+@media (min-width: 768px) {
+  body {
+    background:
+      radial-gradient(
+        ellipse 80% 60% at 50% 0%,
+        color-mix(in srgb, var(--c-text-primary) 4%, transparent),
+        transparent 60%
+      ),
+      var(--c-bg-primary);
+    background-attachment: fixed;
+  }
+
+  /* The 500px content column gets a hairline border on either side so it
+     reads as a deliberate "card" on a wide laptop screen. */
+  .app-shell {
+    max-width: 540px;
+    border-left: 1px solid color-mix(in srgb, var(--c-border-subtle) 50%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--c-border-subtle) 50%, transparent);
+  }
+
+  /* Tiles can use a bigger glyph at desktop sizes — no longer constrained
+     by the original 8vw clamp. */
+  .tile {
+    font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  }
+
+  /* Keyboard breathes a bit more. */
+  .keyboard {
+    max-width: 540px;
+    gap: 10px;
+    padding: 0 12px 12px;
+  }
+  .keyboard-row {
+    gap: 7px;
+  }
+  .key {
+    height: 60px;
+    font-size: 14px;
+    border-radius: 5px;
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      transform 100ms ease,
+      filter 120ms ease;
+  }
+  .key[data-wide="true"] {
+    font-size: 13px;
+  }
+
+  /* Modals get a bit more reading width on desktop. */
+  .modal-card {
+    max-width: 540px;
+  }
+}
+
+/* Crisper hover only when an actual pointer is present. */
+@media (hover: hover) and (pointer: fine) {
+  .key:hover {
+    filter: brightness(1.1) saturate(1.05);
+  }
+  .key:active {
+    transform: scale(0.96);
+    filter: brightness(0.95);
+  }
+}
+
+/* The board's fluid sizing is defined in the main .board rule above. These
+   media queries widen it as the viewport grows so it never feels tiny on
+   a laptop monitor. */
+@media (min-width: 768px) {
+  .board {
+    max-width: 380px;
+  }
+}
+@media (min-width: 1024px) {
+  .board {
+    max-width: 400px;
+  }
+}
