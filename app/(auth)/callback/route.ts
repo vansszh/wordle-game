@@ -1,19 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { profileFromAuthUser } from "@/lib/supabase/profile";
 import { upsertProfile } from "@/lib/db/queries";
 
-/**
- * OAuth callback handler. Exchanges the `code` returned by Supabase Auth
- * for a session, then ensures the corresponding profile row exists.
- */
+// Exchange the OAuth `code` for a session, then mirror the profile into our DB.
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const next = url.searchParams.get("next") ?? "/";
 
-  if (!code) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", url));
-  }
+  if (!code) return NextResponse.redirect(new URL("/login?error=missing_code", url));
 
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -23,23 +19,10 @@ export async function GET(request: Request): Promise<Response> {
     return NextResponse.redirect(new URL("/login?error=oauth_failed", url));
   }
 
-  const u = data.user;
-
-  // Best-effort profile upsert — don't block sign-in if DB is unavailable.
+  // Best-effort — don't block sign-in if the DB call fails.
   if (process.env.DATABASE_URL) {
     try {
-      await upsertProfile({
-        id: u.id,
-        email: u.email ?? "",
-        displayName:
-          (u.user_metadata?.["full_name"] as string | undefined) ??
-          (u.user_metadata?.["name"] as string | undefined) ??
-          null,
-        avatarUrl:
-          (u.user_metadata?.["avatar_url"] as string | undefined) ??
-          (u.user_metadata?.["picture"] as string | undefined) ??
-          null,
-      });
+      await upsertProfile(profileFromAuthUser(data.user));
     } catch (e) {
       console.error("[callback] profile upsert failed", e);
     }

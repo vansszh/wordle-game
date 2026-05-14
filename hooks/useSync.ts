@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/store/gameStore";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { profileFromAuthUser } from "@/lib/supabase/profile";
 import type { CurrentGameState, PlayerStats, SyncState, UserProfile } from "@/types";
 
 interface SyncApi {
@@ -80,13 +81,7 @@ export function useSync(): SyncApi {
     const refresh = async () => {
       const { data } = await sb.auth.getUser();
       if (!active) return;
-      const u = data?.user ?? null;
-      setUser(u ? {
-        id: u.id,
-        email: u.email ?? "",
-        displayName: (u.user_metadata?.["full_name"] ?? u.user_metadata?.["name"] ?? null) as string | null,
-        avatarUrl: (u.user_metadata?.["avatar_url"] ?? u.user_metadata?.["picture"] ?? null) as string | null,
-      } : null);
+      setUser(data?.user ? profileFromAuthUser(data.user) : null);
     };
 
     void refresh();

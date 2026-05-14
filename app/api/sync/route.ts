@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { profileFromAuthUser } from "@/lib/supabase/profile";
 import {
   getGameStateForDate,
   getUserStats,
@@ -10,38 +11,19 @@ import {
 import { utcDateKey } from "@/lib/game/words";
 import type { CurrentGameState, PlayerStats } from "@/types";
 
-interface PushRequest {
-  action: "push";
-  currentGame: CurrentGameState;
-  stats: PlayerStats;
-}
-
-interface PullRequest {
-  action: "pull";
-}
-
-type SyncRequest = PushRequest | PullRequest;
+type SyncRequest =
+  | { action: "push"; currentGame: CurrentGameState; stats: PlayerStats }
+  | { action: "pull" };
 
 export const runtime = "nodejs";
 
-async function requireUser() {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) return null;
-  return data.user;
-}
-
 export async function POST(request: Request): Promise<Response> {
-  const user = await requireUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const supabase = await getSupabaseServerClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json(
-      { error: "DATABASE_URL is not configured on the server." },
-      { status: 503 },
-    );
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 503 });
   }
 
   let body: SyncRequest;
@@ -51,25 +33,13 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  // Best-effort profile sync (idempotent).
-  await upsertProfile({
-    id: user.id,
-    email: user.email ?? "",
-    displayName:
-      (user.user_metadata?.["full_name"] as string | undefined) ??
-      (user.user_metadata?.["name"] as string | undefined) ??
-      null,
-    avatarUrl:
-      (user.user_metadata?.["avatar_url"] as string | undefined) ??
-      (user.user_metadata?.["picture"] as string | undefined) ??
-      null,
-  });
+  // Mirror auth.users into public.profiles so foreign-key references resolve.
+  await upsertProfile(profileFromAuthUser(auth.user));
 
   if (body.action === "pull") {
-    const today = utcDateKey();
     const [game, stats] = await Promise.all([
-      getGameStateForDate(user.id, today),
-      getUserStats(user.id),
+      getGameStateForDate(auth.user.id, utcDateKey()),
+      getUserStats(auth.user.id),
     ]);
     return NextResponse.json({ currentGame: game, stats });
   }
@@ -80,18 +50,14 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
     }
 
-    // Conflict resolution: if the server already has a completed game for
-    // today, keep the server version. Otherwise upsert local.
-    const serverGame = await getGameStateForDate(user.id, currentGame.date);
-    const serverIsComplete =
-      serverGame && (serverGame.gameStatus === "WIN" || serverGame.gameStatus === "LOSE");
-    const localIsComplete =
-      currentGame.gameStatus === "WIN" || currentGame.gameStatus === "LOSE";
+    // Conflict resolution: if the server already has a finished game for
+    // this date, keep it unless the local copy is also finished.
+    const serverGame = await getGameStateForDate(auth.user.id, currentGame.date);
+    const serverDone = serverGame && serverGame.gameStatus !== "IN_PROGRESS";
+    const localDone = currentGame.gameStatus !== "IN_PROGRESS";
 
-    if (!serverIsComplete || localIsComplete) {
-      await upsertGameState(user.id, currentGame);
-    }
-    await upsertUserStats(user.id, stats);
+    if (!serverDone || localDone) await upsertGameState(auth.user.id, currentGame);
+    await upsertUserStats(auth.user.id, stats);
 
     return NextResponse.json({ ok: true });
   }

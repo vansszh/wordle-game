@@ -1,6 +1,14 @@
 # Wordle
 
-A pixel-perfect, production-ready clone of the original New York Times Wordle, built as a single-page Next.js 15 app with optional cloud sync.
+A pixel-perfect Wordle clone built with Next.js 15, Tailwind v4 and Supabase.
+
+**[Play it live →](https://playwordleweb.vercel.app)**
+
+[![Built with Next.js](https://img.shields.io/badge/Next.js-15-000?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ![Wordle screenshot](docs/screenshot.png)
 
